@@ -18,7 +18,7 @@ def main():
     parser.add_argument('--item-column', action="store", default = 1)
     parser.add_argument('--minsup', action="store", default = 3)
     parser.add_argument('--minconf', action="store", default = 0.5)
-    parser.add_argument('--k', action="store", default = 10)
+    parser.add_argument('--num-rules', action="store", default = 10)
     parser.add_argument('--max-rows', action="store", default = False)
 
     args = parser.parse_args()
@@ -32,11 +32,11 @@ def main():
     minsup = int(args.minsup)
     min_conf = float(args.minconf)
     max_rows = int(args.max_rows)
-    k = int(args.k)
+    k = int(args.num_rules)
 
     binary_d = create_binary_representation(mkt_data, transaction_id_column, item_column)
     if max_rows:
-        binary_d = binary_d.head(max_rows)
+        binary_d = binary_d.ix[:max_rows,:]
 
     i = binary_d.columns
     print(len(i))
@@ -71,6 +71,11 @@ def rank_rules(rules, metric_1, metric_2, k):
     #metric_2: string
     #k: int. Number of rules to return
     #Returns: list of rules sorted by rank of metric_1, metric_2, and the size of the rule (|X| + |Y|)
+
+    if not rules:
+        print("There were no rules given the paramaters entered previously!")
+        return False
+
     for rule in rules:
         rule["combined_metric"] = 0.5*rule.get(metric_1) + 0.5*rule.get(metric_2)
         rule["size"] = len(rule.get("X")) + len(rule.get("Y"))
